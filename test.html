@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIF Email Approval - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <style>
+        body { font-family: 'Hind Siliguri', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        .header { text-align: center; background: #00695c; color: white; padding: 20px; border-radius: 15px; margin-bottom: 30px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; border-left: 5px solid #00695c; display: flex; justify-content: space-between; align-items: center; }
+        .info b { font-size: 18px; color: #333; }
+        .info p { margin: 5px 0; color: #666; font-size: 14px; }
+        .btn-approve { background: #00695c; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-approve:hover { background: #004d40; }
+        .btn-approve:disabled { background: #ccc; cursor: not-allowed; }
+        .status-msg { text-align: center; color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>রাফাহিয়াতুল ইনসান ফাউন্ডেশন</h2>
+        <p>ইমেইল অনুমোদন প্যানেল</p>
+    </div>
+
+    <div id="loading" class="status-msg">পেন্ডিং ডাটা লোড হচ্ছে...</div>
+    <div id="pending-list"></div>
+</div>
+
+<script>
+    // --- ১. আপনার ফায়ারবেস কনফিগারেশন ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyAzGK_y9kx5oVFL1-rGTnSDxDvdYoVIqOg",
+        authDomain: "bmkf-donation-system.firebaseapp.com",
+        databaseURL: "https://bmkf-donation-system-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "bmkf-donation-system",
+        storageBucket: "bmkf-donation-system.firebasestorage.app",
+        messagingSenderId: "718912081844",
+        appId: "1:718912081844:web:98d102b1a6dc07464cace1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // --- ২. EmailJS ইনিশিয়ালাইজ ---
+    emailjs.init("M8KPFz8Wbp6tNUcfR");
+
+    // --- ৩. পেন্ডিং লিস্ট লোড করা ---
+    function loadPending() {
+        const listDiv = document.getElementById('pending-list');
+        const loading = document.getElementById('loading');
+
+        db.ref('pending_donations').on('value', (snapshot) => {
+            loading.style.display = 'none';
+            listDiv.innerHTML = "";
+            
+            if (!snapshot.exists()) {
+                listDiv.innerHTML = "<p class='status-msg'>বর্তমানে কোনো পেন্ডিং অনুদান নেই।</p>";
+                return;
+            }
+
+            snapshot.forEach(child => {
+                const d = child.val();
+                const key = child.key;
+
+                listDiv.innerHTML += `
+                    <div class="card" id="card-${key}">
+                        <div class="info">
+                            <b>${d.donorName}</b> <br>
+                            <p><i class="fas fa-envelope"></i> ${d.donorEmail}</p>
+                            <p><i class="fas fa-coins"></i> পরিমাণ: ৳${d.amount} | খাত: ${d.project}</p>
+                            <p><i class="fas fa-fingerprint"></i> TrxID: ${d.trxID}</p>
+                        </div>
+                        <button class="btn-approve" onclick="approveAndEmail('${key}')" id="btn-${key}">
+                            Approve & Email
+                        </button>
+                    </div>
+                `;
+            });
+        });
+    }
+
+    // --- ৪. অনুমোদন ও ইমেইল পাঠানো ---
+    function approveAndEmail(key) {
+        const btn = document.getElementById(`btn-${key}`);
+        if(!confirm("আপনি কি এই অনুদানটি অনুমোদন করে দাতার ইমেইলে রশিদ পাঠাতে চান?")) return;
+
+        btn.disabled = true;
+        btn.innerText = "প্রসেসিং...";
+
+        db.ref('pending_donations/' + key).once('value').then(snap => {
+            const d = snap.val();
+            const approvalDate = new Date().toLocaleDateString('en-GB');
+
+            // ভেরিফাইড ডাটাবেজে ডাটা মুভ করা
+            const newRef = db.ref('donations/' + d.project + '/transactions').push();
+            db.ref('donations/' + d.project + '/transactions/' + newRef.key).set({
+                ...d,
+                date: approvalDate,
+                status: "verified"
+            }).then(() => {
+                // ব্যালেন্স আপডেট
+                db.ref('donations/' + d.project + '/total_amount').transaction(c => (c || 0) + parseFloat(d.amount));
+                
+                // ইমেইল প্যারামিটার (আপনার টেমপ্লেটের সাথে মিল রেখে)
+                const emailParams = {
+                    donorEmail: d.donorEmail,
+                    donorName: d.donorName,
+                    amount: d.amount,
+                    project: d.project,
+                    trxID: d.trxID,
+                    date: approvalDate
+                };
+
+                // ইমেইল পাঠানো
+                emailjs.send("service_0kfsqyf", "template_kf64wde", emailParams)
+                .then(() => {
+                    // পেন্ডিং থেকে ডিলিট
+                    db.ref('pending_donations/' + key).remove();
+                    alert("সফল! অনুদান অনুমোদিত হয়েছে এবং রশিদ পাঠানো হয়েছে।");
+                })
+                .catch((err) => {
+                    console.error("Email Error:", err);
+                    alert("অনুমোদন হয়েছে কিন্তু ইমেইল যায়নি। কনসোল দেখুন।");
+                    btn.disabled = false;
+                    btn.innerText = "আবার চেষ্টা করুন";
+                });
+            });
+        });
+    }
+
+    // পেজ লোড হলে কল হবে
+    loadPending();
+</script>
+
+</body>
+</html>
