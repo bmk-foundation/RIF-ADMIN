@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donation Management Pro</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+    :root {
+        --primary: #00695c;
+        --secondary: #004d40;
+        --accent: #ffc107;
+        --danger: #ff5252;
+        --success: #2ecc71;
+        --bg: #f0f2f5;
+        --white: #ffffff;
+        --text: #2c3e50;
+        --muted: #7f8c8d;
+        --border: #e0e6ed;
+    }
+
+    /* RESET & FONTS */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    @font-face {
+        font-family: 'Adorsho';
+        src: url('AdorshoLip.ttf') format('truetype');
+    }
+
+    body {
+        font-family: 'Adorsho', 'Segoe UI', sans-serif !important;
+        background-color: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        padding-top: 80px; /* Header spacing */
+    }
+
+    /* HEADER */
+    .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: 18px;
+        text-align: center;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* MAIN CONTAINER */
+    .container {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 0 15px;
+    }
+
+    /* TOP CARD */
+    .top-header {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        text-align: center;
+        box-shadow: 0px 0px 3px 1.5px green;
+    }
+
+    .top-header h2 {
+        color: var(--primary);
+        font-weight: 800;
+        font-size: 24px;
+    }
+
+    /* CONTROL PANEL */
+    .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+                box-shadow: 0px 0px 3px 1.5px green;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .control-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    select, input[type="number"], input[type="text"] {
+        padding: 12px 15px;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        outline: none;
+        transition: 0.3s;
+        font-family: inherit;
+        font-size: 14px;
+    }
+
+    select:focus, input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(0, 105, 92, 0.1);
+    }
+
+    /* BUTTONS */
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 700;
+        color: white;
+        transition: 0.3s;
+        font-family: inherit;
+        font-size: 15px;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+    }
+
+    .btn-save { background: var(--primary); }
+    .btn-new { background: var(--accent); color: #000; }
+    .btn-pdf { background: var(--secondary); }
+
+/* TABLE DESIGN - স্পষ্ট ঘর, লাইন ট্র্যাকিং এবং নাম/ফোন ফিক্স */
+#table-wrapper {
+    background: white;
+    border-radius: 12px;
+    padding: 5px; /* প্যাডিং ০ করলে বর্ডার টেবিলের সাথে মিশে থাকবে */
+        box-shadow: 0px 0px 3px 1.5px green;
+    overflow-x: auto; /* মোবাইলে স্ক্রল করার জন্য */
+    border: 1px solid var(--border);
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse; 
+    min-width: 1400px; /* সব মাস যেন জায়গা পায় */
+    table-layout: fixed; /* কলামের সাইজ নিয়ন্ত্রণ করতে এটি জরুরি */
+}
+
+/* হেডার ডিজাইন */
+th {
+    background: #f8fbfc;
+    color: var(--primary);
+    font-weight: 700;
+    text-align: center;
+    padding: 12px 5px;
+    font-size: 13px;
+    border: .3px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* কলাম অনুযায়ী উইডথ সেট করা */
+th:nth-child(1), td:nth-child(1) { width: 180px; } /* নাম কলাম */
+th:nth-child(2), td:nth-child(2) { width: 130px; } /* ফোন কলাম */
+
+/* সেল ডিজাইন */
+td {
+    padding: 0;
+    border: 1px solid var(--border);
+    transition: background 0.2s;
+    height: 45px;
+}
+
+/* লাইন হাইলাইট (Hover & Focus) */
+tr:hover td {
+    background-color: #e0f2f1 !important; 
+}
+
+tr:focus-within td {
+    background-color: #b2dfdb !important;
+}
+
+/* ইনপুট ফিল্ড - যা লেখা কাটতে দেবে না */
+.table-input, input.lock {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.table-input {
+    text-align: center;
+    font-weight: 600;
+}
+
+/* লক করা কলাম (নাম ও ফোন) - সম্পূর্ণ দেখার জন্য */
+input.lock {
+    background: #f8f9fa;
+    font-weight: 700;
+    color: var(--secondary);
+    text-align: left;
+    cursor: not-allowed;
+    white-space: nowrap; /* লেখা নিচে নামবে না */
+    overflow: hidden; /* অতিরিক্ত অংশ লুকাবে */
+    text-overflow: ellipsis; /* বড় নাম হলে শেষে ... দেখাবে */
+}
+
+/* একটি নির্দিষ্ট সেলে ক্লিক করলে হাইলাইট */
+.table-input:focus {
+    background: white !important;
+    box-shadow: inset 0 0 0 2px var(--accent);
+    color: var(--primary);
+}
+
+/* হেডার টেক্সট বড় নাম বা ফোনের ক্ষেত্রেও যেন না ভাঙে */
+th {
+    white-space: nowrap;
+}
+
+/* ============================================================
+   পিডিএফ রিপোর্ট - প্রিমিয়াম ডিজাইন (কালারফুল হেডার ও মোটা কলাম)
+============================================================ */
+.pdf-mode {
+    width: 297mm !important; 
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.pdf-mode table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important; 
+    zoom: 0.8 !important; 
+    margin: 0 !important;
+}
+
+/* কলামের বর্ডার মোটা করা এবং সেন্টার করা */
+.pdf-mode th, .pdf-mode td {
+    padding: 8px 0px !important; /* কলামের উচ্চতা বাড়ানোর জন্য প্যাডিং বৃদ্ধি */
+    border: 1.2pt solid #000 !important; /* বর্ডার মোটা করা হয়েছে */
+    font-family: 'Arial Narrow', sans-serif !important; 
+    font-size: 9px !important;
+    color: #000 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+/* হেডার লাইনের বিশেষ ব্যাকগ্রাউন্ড কালার (নাম, ফোন, মাসের লাইন) */
+.pdf-mode thead tr, .pdf-mode tr:first-child {
+    background-color: #2c3e50 !important; /* গাঢ় নীল/কালো ব্যাকগ্রাউন্ড */
+    -webkit-print-color-adjust: exact !important;
+}
+
+.pdf-mode th {
+    color: red !important; /* হেডারের লেখা সাদা */
+    font-weight: bold !important;
+    text-transform: uppercase !important;
+    border: 1.2pt solid #000 !important;
+}
+
+/* নিচের ডাটা লাইনগুলোর জন্য Zebra Striping ও মোটা বর্ডার */
+.pdf-mode tr:nth-child(even) td {
+    background-color: #f1f4f9 !important; /* জোড় লাইনে হালকা নীলচে ভাব */
+}
+
+.pdf-mode tr:nth-child(odd) td {
+    background-color: #ffffff !important; /* বিজোড় লাইনে সাদা */
+}
+
+/* =========================================
+   কলামের প্রস্থ নিয়ন্ত্রণ (Total 100%)
+   ========================================= */
+
+/* নাম কলাম */
+.pdf-mode th:nth-child(1), .pdf-mode td:nth-child(1) { 
+    width: 13% !important; 
+}
+
+/* ফোন কলাম */
+.pdf-mode th:nth-child(2), .pdf-mode td:nth-child(2) { 
+    width: 10% !important; 
+}
+
+/* ১২টি মাসের কলাম (৭৭% জায়গা ভাগ করা হয়েছে) */
+.pdf-mode td:not(:first-child):not(:nth-child(2)), 
+.pdf-mode th:not(:first-child):not(:nth-child(2)) {
+    width: 6.41% !important;
+}
+
+/* ইনপুট ডাটা ও লক ফিল্ড স্টাইল */
+.pdf-mode .table-input, .pdf-mode .lock {
+    border: none !important;
+    background: transparent !important;
+    width: 100% !important;
+    font-size: 9px !important;
+    font-weight: bold !important; /* ভেতরের লেখাগুলোও মোটা দেখাবে */
+    display: block !important;
+    text-align: center !important;
+    color: inherit !important;
+}
+
+
+
+
+/* প্রিন্ট বা পিডিএফ মোড */
+@media print {
+    #table-wrapper { overflow: visible; }
+    table { min-width: 100%; table-layout: auto; 
+    }
+}
+    /* MOBILE RESPONSIVE */
+    @media (max-width: 850px) {
+        .controls { flex-direction: column; align-items: stretch; }
+        .control-group { flex-direction: column; align-items: stretch; }
+        .top-header h2 { font-size: 18px; }
+        .btn { width: 100%; }
+        
+        /* Table responsive hint */
+        #table-wrapper::after {
+            content: "← বামে-ডানে স্ক্রল করুন →";
+            display: block;
+            text-align: center;
+            font-size: 12px;
+            color: var(--muted);
+            padding: 10px;
+        }
+    }
+
+    /* STATUS MESSAGE */
+    #status {
+        margin-top: 20px;
+        font-weight: 700;
+        background: white;
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+</style>
+
+</head>
+<body>
+  <header class="header">
+    <h3 style="margin:0;">রাফাহিয়াতুল ইনসান ফাউন্ডেশন</h3>
+</header>
+<div class="container">
+  <div class="top-header">
+    <h2> সদস্য দান ডাটাবেজ - <span id="displayYear">লোডিং...</span></h2>
+  </div>
+
+  <div class="controls">
+    <div class="control-group">
+      <b>সকল শিট</b>
+      <select id="yearSelector" onchange="fetchData()"></select>
+    </div>
+    <div class="control-group" style="border-left: 1px solid #ddd; padding-left: 10px;">
+      <input type="number" id="newYearInput" placeholder="নতুন সাল (২০২৬)">
+      <button class="btn btn-new" onclick="createNewYear()"> <i class="fa-solid fa-circle-plus"></i> তৈরি করুন</button>
+    </div>
+  </div>
+
+  <div id="table-wrapper">
+    <div id="table-container">ডাটা লোড হচ্ছে...</div>
+  </div>
+
+<div class="actions-bar" style="margin-top:25px; display:flex; 
+  justify-content:center; gap:10px; 
+  flex-wrap: nowrap; padding: 0 10px;">
+    
+    <button class="btn btn-save" style="flex: 1; max-width: 150px; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="saveData()">
+        <i class="fa-solid fa-floppy-disk"></i> সংরক্ষণ
+    </button>
+    
+    <button class="btn btn-pdf" style="flex: 1; max-width: 150px; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="downloadPDF()">
+        <i class="fa-solid fa-file-arrow-down"></i> ডাউনলোড
+    </button>
+    
+</div>
+
+  <p id="status"></p>
+</div>
+
+<script>
+  // আপনার Apps Script URL
+  const URL = 'https://script.google.com/macros/s/AKfycbxKfoSYuIoL0bpdEsxyVIGCbCXYJiSfDl1ZUlVR77kKHfZlbdgF-cZZ2wo1q_Q0lFfu/exec'; 
+
+  let headers = [];
+
+// ১. ইংরেজি সংখ্যাকে বাংলা সংখ্যায় রূপান্তর করার ফাংশন
+function toBengaliNumber(n) {
+  const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  return n.toString().split('').map(digit => bengaliDigits[digit] || digit).join('');
+}
+
+// ২. সব শিটের লিস্ট লোড করা এবং বর্তমান সাল ডিফল্ট রাখা
+async function loadSheetList() {
+  try {
+    const res = await fetch(`${URL}?action=getSheets`);
+    const sheetNames = await res.json();
+    const selector = document.getElementById("yearSelector");
+    
+    // বর্তমান ইংরেজি সাল খুঁজে বের করা (যেমন: 2026, 2027 ইত্যাদি)
+    const currentYear = new Date().getFullYear().toString();
+    
+    selector.innerHTML = ""; 
+    let matchFound = false;
+
+    sheetNames.forEach(name => {
+      let option = document.createElement("option");
+      option.value = name;
+
+      // নাম সেট করা: Sheet1 হলে মাস্টার, অন্যথায় ইংরেজি নামকে বাংলায় রূপান্তর
+      if (name === "Sheet1") {
+        option.text = "২০২৫ (মাস্টার)";
+      } else {
+        option.text = toBengaliNumber(name);
+      }
+      
+      // যদি শিটের নাম (যেমন: "2026") বর্তমান সালের সাথে মিলে যায়, তবে সেটি অটো-সিলেক্ট হবে
+      if (name === currentYear) {
+        option.selected = true;
+        matchFound = true;
+      }
+      
+      selector.appendChild(option);
+    });
+
+    // যদি বর্তমান সালের কোনো শিট না থাকে, তবে তালিকার প্রথমটি সিলেক্ট থাকবে
+    if (!matchFound && selector.options.length > 0) {
+      selector.options[0].selected = true;
+    }
+    
+    fetchData(); // সিলেক্টেড শিটের ডাটা লোড হবে
+    
+  } catch (e) {
+    console.error(e);
+    document.getElementById("status").innerText = "❌ শিট লিস্ট লোড করতে সমস্যা হয়েছে।";
+  }
+}
+
+  async function fetchData() {
+    const year = document.getElementById("yearSelector").value;
+    if(!year) return;
+
+    // সালটি টাইটেলে বাংলাতে দেখানোর জন্য (যেমন: 2026 থেকে ২০২৬)
+    // Sheet1 হলে ২০২৫ দেখাবে, অন্যথায় ইংরেজি সালকে বাংলায় রূপান্তর করবে
+    const displayYearText = (year === "Sheet1") ? "২০২৫" : toBengaliNumber(year);
+    document.getElementById("displayYear").innerText = displayYearText;
+
+    document.getElementById("table-container").innerHTML = "<div style='text-align:center; padding:40px;'><img src='https://i.gifer.com/ZZ5H.gif' width='30'><br>লোড হচ্ছে...</div>";
+    
+    try {
+      const res = await fetch(`${URL}?action=read&year=${year}`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        headers = Object.keys(data[0]);
+        renderTable(data);
+      } else {
+        document.getElementById("table-container").innerHTML = "কোন তথ্য পাওয়া যায়নি।";
+      }
+    } catch (e) {
+      document.getElementById("table-container").innerHTML = "Error!";
+    }
+}
+
+
+  function renderTable(data) {
+    let html = '<table><thead><tr>';
+    headers.forEach(h => html += `<th>${h}</th>`);
+    html += '</tr></thead><tbody>';
+    data.forEach((row, rIdx) => {
+      html += '<tr>';
+      headers.forEach(h => {
+        let val = row[h] || "";
+        let isLock = (h === "নাম" || h === "ফোন") ? 'readonly class="lock"' : 'class="table-input"';
+        html += `<td><input ${isLock} data-row="${rIdx}" data-header="${h}" value="${val}"></td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById("table-container").innerHTML = html;
+  }
+
+  async function saveData() {
+    const year = document.getElementById("yearSelector").value;
+    const inputs = document.querySelectorAll("#table-container input");
+    let updatedData = [];
+    inputs.forEach(input => {
+      const r = input.dataset.row;
+      const h = input.dataset.header;
+      if (!updatedData[r]) updatedData[r] = {};
+      updatedData[r][h] = input.value;
+    });
+
+    document.getElementById("status").style.color = "orange";
+    document.getElementById("status").innerText = "⏳ ডাটাবেজ আপডেট হচ্ছে...";
+    try {
+      const res = await fetch(`${URL}?year=${year}&action=update`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `data=${encodeURIComponent(JSON.stringify(updatedData))}`
+      });
+      const msg = await res.text();
+      document.getElementById("status").style.color = "green";
+      document.getElementById("status").innerText = "✅ " + msg;
+      setTimeout(() => document.getElementById("status").innerText = "", 3000);
+    } catch (e) {
+      document.getElementById("status").innerText = "❌ সেভ হয়নি!";
+    }
+  }
+
+  async function createNewYear() {
+    const newYear = document.getElementById("newYearInput").value;
+    if (!newYear) return alert("সঠিক সাল দিন!");
+    document.getElementById("status").innerText = "⏳ প্রসেসিং...";
+    try {
+      const res = await fetch(`${URL}?action=createNewSheet&newYear=${newYear}`);
+      const msg = await res.text();
+      alert(msg);
+      loadSheetList();
+    } catch (e) { alert("ত্রুটি!"); }
+  }
+
+function downloadPDF() {
+    const wrapper = document.getElementById('table-wrapper');
+    const year = document.getElementById("yearSelector").value;
+    
+    wrapper.classList.add('pdf-mode');
+
+    const opt = {
+        margin: 0,
+        filename: `Donation_Report_${year}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 3, // হাই কোয়ালিটি 
+            useCORS: true,
+            width: wrapper.offsetWidth // টেবিলের প্রকৃত উইডথ ব্যবহার করা
+        },
+        jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'landscape' 
+        }
+    };
+
+    document.getElementById("status").innerText = "⏳ পিডিএফ তৈরি হচ্ছে...";
+
+    html2pdf().set(opt).from(wrapper).save().then(() => {
+        wrapper.classList.remove('pdf-mode');
+        document.getElementById("status").innerText = "✅ ডাউনলোড সফল!";
+    }).catch(err => {
+        wrapper.classList.remove('pdf-mode');
+        console.error(err);
+    });
+}
+
+
+  window.onload = loadSheetList;
+</script>
+</body>
+</html>

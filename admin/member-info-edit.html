@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BMKF — Manage Members</title>
+<style>
+  :root {
+    --primary: #00695c;
+    --secondary: #004d40;
+    --accent: #ffc107;
+    --danger: #ff5252;
+    --success: #2ecc71;
+    --bg: #f0f2f5;
+    --white: #ffffff;
+    --text: #2c3e50;
+    --muted: #7f8c8d;
+    --border: #e0e6ed;
+}
+
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+/* আদর্শ লিপি ফন্টের জন্য */
+@font-face {
+    font-family: 'Adorsho';
+    src: url('AdorshoLip.ttf') format('truetype');
+}
+
+/* একুইনো ডেমো ফন্টের জন্য */
+@font-face {
+    font-family: 'Aquino-Demo';
+    src: url('Aquino-Demo.ttf') format('truetype');
+}
+
+
+body {
+    font-family: 'Adorsho', sans-serif !important;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+}
+/* HEADER */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: var(--secondary);
+    color: var(--white);
+    padding: 16px;
+    text-align: center;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.header h3 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* MAIN CONTAINER */
+.main-container {
+    max-width: 1000px;
+    margin: 90px auto 40px;
+    padding: 0 20px;
+}
+
+/* TOP NAVIGATION */
+.buttons-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.buttons-container button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: var(--primary);
+    color: var(--white);
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.buttons-container button:hover {
+    background: var(--primary);
+    color: white;
+}
+
+h1, h2 {
+    color: var(--primary);
+    margin: 20px 0;
+    font-weight: 700;
+}
+
+h1 { font-size: 24px; text-align: center; }
+h2 { font-size: 20px; border-bottom: 2px solid var(--primary); display: inline-block; padding-bottom: 5px; }
+
+/* SEARCH BOX */
+input[type="search"] {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    margin-bottom: 25px;
+    outline: none;
+    transition: 0.3s;
+    background: white;
+}
+
+input[type="search"]:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(0, 105, 92, 0.1);
+}
+
+/* TABLE DESIGN */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    margin-bottom: 30px;
+}
+
+th {
+    background: transparent;
+    color: var(--muted);
+    font-weight: 600;
+    text-align: left;
+    padding: 12px 15px;
+    font-size: 14px;
+}
+
+td {
+    background: white;
+    padding: 15px;
+    font-size: 14px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+td:first-child { border-left: 1px solid var(--border); border-radius: 12px 0 0 12px; }
+td:last-child { border-right: 1px solid var(--border); border-radius: 0 12px 12px 0; }
+
+.ok { background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 12px; }
+.tag { background: #ffebee; color: #c62828; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 12px; }
+
+/* TABLE ACTION BUTTON (Edit) */
+.btnEdit {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* FORM STYLING (Card Look) */
+#editForm {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 6px;
+    margin-top: 10px;
+}
+
+input:not([type="search"]), select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: #fcfcfc;
+    transition: 0.3s;
+}
+
+input:focus, select:focus {
+    border-color: var(--primary);
+    background: white;
+    outline: none;
+}
+
+.form-row {
+  
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 5px;
+}
+
+/* PHOTO PREVIEW */
+#imgPreview {
+    margin-top: 10px;
+    padding: 10px;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    display: inline-block;
+}
+
+/* BUTTON GROUP (Customized as requested) */
+.button-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 30px;
+    width: 100%;
+}
+
+.button-group button {
+    flex: 1;
+    min-height: 50px;
+    padding: 8px 5px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 10px;
+    border: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button-group button:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+button.primary { background: var(--success); color: white; }
+button.warn { background: var(--danger); color: white; }
+button.ghost { background: var(--accent); color: #333; }
+
+/* SUCCESS MODAL */
+.success-card {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: none; align-items: center; justify-content: center;
+    z-index: 9999;
+}
+.success-card.show { display: flex; }
+.card-content { background: white; padding: 40px; border-radius: 20px; text-align: center; }
+#searchInput,#inpPhotoURL,#inpRole,#inpId,#inpName,#inpYear{
+  font-family: 'Adorsho','Aquino-Demo', sans-serif !important; 
+}
+/* RESPONSIVE */
+@media(max-width: 768px) {
+    .form-row { grid-template-columns: 1fr; }
+    table { display: block; overflow-x: auto; }
+    .button-group { flex-direction: row; gap: 6px; }
+    .button-group button { font-size: 14px; padding: 10px 4px; }
+    #searchInput,#inpPhotoURL,#inpRole,#inpId,#inpName,#inpYear{
+      font-family: 'Adorsho', sans-serif !important; 
+    }
+}
+
+</style>
+</head>
+<body>
+<header class="header">
+    <h3 style="margin:0;">রাফাহিয়াতুল ইনসান ফাউন্ডেশন</h3>
+</header>
+<div class="main-container">
+  <!-- তোমার সব content এখানে থাকবে -->
+<div class="buttons-container">
+  <button onclick="location.href='member-info-add.html'">Add Member</button>
+  <button onclick="location.href='member-info-view.html'">View Members</button>
+</div>
+<h1>মেম্বার ম্যানেজমেন্ট</h1>
+
+<div>
+  <label for="searchInput">মেম্বার সার্চ করুন (ID, নাম, ফোন):</label>
+  <input type="search" id="searchInput" placeholder="সার্চ করুন...">
+</div>
+
+<table>
+  <thead>
+    <tr><th>ID</th><th>নাম</th><th>Role</th><th>Phone</th><th>Join Year</th><th>Verified</th><th>Actions</th></tr>
+  </thead>
+  <tbody id="membersBody">
+    <tr><td colspan="7" class="small">লোড হচ্ছে...</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>মেম্বার তথ্য এডিট করুন</h2>
+<form id="editForm" onsubmit="return false;">
+  <div class="form-row">
+    <div>
+      <label for="inpId">Member ID</label>
+<input type="text" id="inpId">
+    </div>
+    <div>
+      <label for="inpName">Full Name</label>
+      <input type="text" id="inpName" required>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div>
+      <label for="inpRole">Role</label>
+<select id="inpRole">
+  <option>আমির</option>
+  <option>নায়েবে-আমির</option>
+  <option>সেক্রেটারি</option>
+  <option>ক্যাশিয়ার</option>
+  <option>সাংগঠনিক সম্পাদক</option>
+  <option>প্রচার সম্পাদক</option>
+  <option>সাধারণ মেম্বার</option>
+</select>
+    </div>
+    <div>
+      <label for="inpPhone">Phone (digits only)</label>
+      <input type="text" id="inpPhone" pattern="\d*" title="Only digits allowed">
+    </div>
+  </div>
+  <div class="form-row">
+    <div>
+      <label>Profile Photo (File or URL)</label>
+      <div style="display: flex; gap: 5px;">
+        <input type="file" id="inpFile" accept="image/*">
+        <input type="text" id="inpPhotoURL" placeholder="অথবা লিঙ্ক দিন">
+      </div>
+    </div>
+    <div id="imgPreview" style="text-align:center; display:none;">
+      <img id="preview" src="" style="width:80px; height:100px; border-radius:8px; object-fit:cover; border:1px solid #ddd; margin-top: 5px;">
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div>
+      <label for="inpYear">Join Year</label>
+      <input type="number" id="inpYear" min="2000" max="2100" required>
+    </div>
+    <div>
+      <label for="inpVerified">Verified</label>
+      <select id="inpVerified">
+        <option value="true">Yes</option>
+        <option value="false">No</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <div class="button-group">
+    <button class="primary" id="btnSave">Save Changes</button>
+    <button class="warn" id="btnDelete" type="button">Delete Member</button>
+    <button class="ghost" id="btnClear" type="button">Clear Form</button>
+    </div>
+  </div>
+</form>
+<div id="successCard" class="success-card">
+  <div class="card-content">
+    <div class="checkmark-circle">
+      <div class="checkmark draw"></div>
+    </div>
+    <h3>সফল হয়েছে!</h3>
+    <p id="successText">মেম্বার তথ্য আপডেট হয়েছে</p>
+  </div>
+</div></div>
+
+<script 
+type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBOBeWy-3P39kVnxNmQIMm0-Mawol1qjQU",
+  authDomain: "admin-fe276.firebaseapp.com",
+  databaseURL: "https://admin-fe276-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "admin-fe276",
+  storageBucket: "admin-fe276.appspot.com",
+  messagingSenderId: "1047359464238",
+  appId: "1:1047359464238:web:bbb93e1b350b8d925110bf"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const tbody = document.getElementById('membersBody');
+const searchInput = document.getElementById('searchInput');
+
+const inpId = document.getElementById('inpId');
+const inpName = document.getElementById('inpName');
+const inpRole = document.getElementById('inpRole');
+const inpPhone = document.getElementById('inpPhone');
+const inpYear = document.getElementById('inpYear');
+const inpVerified = document.getElementById('inpVerified');
+
+const btnSave = document.getElementById('btnSave');
+const btnDelete = document.getElementById('btnDelete');
+const btnClear = document.getElementById('btnClear');
+
+let members = {};
+let selectedId = null;
+
+function renderMembers(filterTerm = '') {
+  tbody.innerHTML = '';
+  const keys = Object.keys(members).sort();
+  const term = filterTerm.trim().toLowerCase();
+
+  let filtered = keys.filter(k => {
+    const m = members[k];
+    if(!m) return false;
+    const combined = `${m.id} ${m.name} ${m.phone}`.toLowerCase();
+    return combined.includes(term);
+  });
+
+  if(filtered.length === 0){
+    tbody.innerHTML = `<tr><td colspan="7" class="small">কোনো মেম্বার পাওয়া যায়নি</td></tr>`;
+    return;
+  }
+
+  for(const k of filtered){
+    const m = members[k];
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td>${m.id}</td>
+        <td>${m.name}</td>
+        <td>${m.role || ''}</td>
+        <td>${m.phone || ''}</td>
+        <td>${m.year || ''}</td>
+        <td>${m.verified ? '<span class="ok">Yes</span>' : '<span class="tag">No</span>'}</td>
+        <td>
+          <button data-id="${m.id}" class="btnEdit">Edit</button>
+        </td>
+      </tr>
+    `);
+  }
+
+  // attach edit button handlers
+  tbody.querySelectorAll('.btnEdit').forEach(btn => {
+    btn.onclick = () => loadMemberToForm(btn.dataset.id);
+  });
+}
+const inpFile = document.getElementById('inpFile');
+const inpPhotoURL = document.getElementById('inpPhotoURL');
+const preview = document.getElementById('preview');
+const imgPreview = document.getElementById('imgPreview');
+
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});
+
+// ফাইল সিলেক্ট করলে প্রিভিউ
+inpFile.onchange = async e => {
+    const file = e.target.files[0];
+    if (file) {
+        inpPhotoURL.value = ''; 
+        const base64 = await toBase64(file);
+        preview.src = base64;
+        imgPreview.style.display = 'block';
+    }
+};
+
+// লিঙ্ক দিলে প্রিভিউ
+inpPhotoURL.oninput = e => {
+    const url = e.target.value.trim();
+    if (url) {
+        inpFile.value = '';
+        preview.src = url;
+        imgPreview.style.display = 'block';
+    }
+};
+
+
+
+function loadMemberToForm(id){
+  if(!members[id]){
+    alert('Member not found');
+    return;
+  }
+  const m = members[id];
+  selectedId = id;
+  inpId.value = m.id || '';
+  inpName.value = m.name || '';
+  inpRole.value = m.role || 'সাধারণ মেম্বার';
+  inpPhone.value = m.phone || '';
+  inpYear.value = m.year || new Date().getFullYear();
+  inpVerified.value = m.verified ? 'true' : 'false';
+
+  // ছবি প্রিভিউ লোড করা
+  if(m.photo){
+    preview.src = m.photo;
+    imgPreview.style.display = 'block';
+    inpPhotoURL.value = m.photo.startsWith('http') ? m.photo : ''; // যদি লিঙ্ক হয় তবে বক্সে দেখাবে
+  } else {
+    imgPreview.style.display = 'none';
+    preview.src = '';
+    inpPhotoURL.value = '';
+  }
+
+  document.getElementById('editForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+btnSave.onclick = async () => {
+  if(!selectedId){
+    alert('প্রথমে একটি মেম্বার সিলেক্ট করুন।');
+    return;
+  }
+
+  const newId = inpId.value.trim();
+  
+  // --- ছবির ডাটা হ্যান্ডলিং (নতুন যুক্ত হয়েছে) ---
+  // যদি নতুন ফাইল সিলেক্ট করা হয় বা লিঙ্ক দেওয়া হয় তবে সেটি নিবে, 
+  // না হলে মেম্বারের আগের ছবিটিই (যদি থাকে) রেখে দিবে।
+  let photoData = members[selectedId].photo || ""; 
+  const file = inpFile.files[0];
+  const url = inpPhotoURL.value.trim();
+
+  if(file) {
+    photoData = await toBase64(file);
+  } else if(url) {
+    photoData = url;
+  }
+  // ------------------------------------------
+
+  const updatedData = {
+    id: newId,
+    name: inpName.value.trim(),
+    role: inpRole.value.trim(),
+    phone: inpPhone.value.trim().replace(/\D/g,''),
+    year: inpYear.value.trim(),
+    verified: inpVerified.value === 'true',
+    photo: photoData // পে-লোডে ফটো ডাটা যুক্ত করা হলো
+  };
+
+  if(!newId){
+    alert('ID দিতে হবে');
+    return;
+  }
+
+  if(newId !== selectedId && members[newId]){
+    alert('এই ID আগে থেকেই আছে');
+    return;
+  }
+
+  try {
+    // যদি ID change হয়
+    if(newId !== selectedId){
+      // নতুন ID তে data save
+      await update(ref(db, 'members/' + newId), updatedData);
+      // পুরাতন ID delete
+      await remove(ref(db, 'members/' + selectedId));
+    } else {
+      // শুধু সরাসরি update
+      await update(ref(db, 'members/' + selectedId), updatedData);
+    }
+
+    showSuccess('মেম্বার তথ্য সফলভাবে আপডেট হয়েছে');
+    clearForm();
+  } catch (e) {
+    alert('সমস্যা হয়েছে: ' + e.message);
+  }
+};
+
+
+btnDelete.onclick = async () => {
+  if(!selectedId){
+    alert('প্রথমে একটি মেম্বার সিলেক্ট করুন।');
+    return;
+  }
+  if(!confirm('আপনি কি নিশ্চিত মেম্বার ডিলেট করতে চান?')){
+    return;
+  }
+
+  try {
+    await remove(ref(db, 'members/' + selectedId));
+    showSuccess('মেম্বার সফলভাবে ডিলেট হয়েছে');
+    clearForm();
+  } catch (e) {
+    alert('ডিলেট করতে সমস্যা হয়েছে: ' + e.message);
+  }
+};
+
+btnClear.onclick = () => {
+  clearForm();
+};
+
+function clearForm(){
+  selectedId = null;
+  inpId.value = '';
+  inpName.value = '';
+  inpRole.value = 'সাধারণ মেম্বার';
+  inpPhone.value = '';
+  inpYear.value = new Date().getFullYear();
+  inpVerified.value = 'false';
+  inpFile.value = '';
+  inpPhotoURL.value = '';
+  imgPreview.style.display = 'none';
+  preview.src = '';
+}
+
+
+searchInput.addEventListener('input', e => {
+  renderMembers(e.target.value);
+});
+
+onValue(ref(db, 'members'), snap => {
+  members = snap.val() || {};
+  renderMembers(searchInput.value);
+});
+
+clearForm();
+function showSuccess(message){
+  const card = document.getElementById('successCard');
+  const text = document.getElementById('successText');
+
+  text.innerText = message;
+  card.classList.add('show');
+
+  setTimeout(() => {
+    card.classList.remove('show');
+  }, 2000);
+}
+</script>
+</body>
+</html>

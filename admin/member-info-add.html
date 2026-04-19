@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>RIF — Add Member</title>
+<style>
+  :root {
+    --primary: #00695c;
+    --secondary: #004d40;
+    --accent: #ffc107;
+    --danger: #ff5252;
+    --success: #2ecc71;
+    --sidebar-width: 260px;
+    --bg: #f0f2f5;
+    --white: #ffffff;
+    --text: #2c3e50;
+    --text-muted: #7f8c8d;
+}
+
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+@font-face {
+    font-family: 'Adorsho';
+    src: url('AdorshoLip.ttf') format('truetype');
+}
+body {
+    font-family: 'Adorsho', sans-serif !important;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+}
+
+/* HEADER */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: var(--secondary);
+    color: var(--white);
+    padding: 16px;
+    text-align: center;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.header h3 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* NAVIGATION BUTTONS */
+.buttons-container {
+    max-width: 650px;
+    margin: 95px auto 20px;
+    display: flex;
+    gap: 12px;
+    padding: 0 20px;
+}
+
+.buttons-container button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: var(--primary);
+    color: var(--white);
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 105, 92, 0.2);
+}
+
+.buttons-container button:hover {
+    background: var(--primary);
+    color: var(--white);
+}
+
+h1 {
+    text-align: center;
+    color: var(--secondary);
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+/* CARD DESIGN */
+.card {
+    width: 95%;
+    max-width: 650px;
+    margin: 0 auto 50px;
+    background: var(--white);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+}
+
+/* FORM ELEMENTS */
+label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-top: 18px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+input, select {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #eaeeef;
+    border-radius: 12px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background: #fdfdfd;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(0, 105, 92, 0.1);
+    background: var(--white);
+}
+
+/* PHOTO PREVIEW AREA */
+#imgPreview {
+    margin-top: 20px;
+    background: #f8f9fa;
+    border: 2px dashed #d1d8e0;
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+}
+
+#preview {
+    width: 110px !important;
+    height: 135px !important;
+    border: 4px solid var(--white);
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* ROW LAYOUT */
+.row {
+    display: flex;
+    gap: 15px;
+}
+
+
+
+/* বাটন গ্রুপ কন্টেইনার */
+.button-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* বাটনগুলোর মাঝখানের ফাঁকা জায়গা */
+    margin-top: 25px;
+    width: 100%;
+}
+
+/* কমন বাটন স্টাইল */
+.button-group button {
+    flex: 1; /* তিনটি বাটনকে সমান জায়গা দিবে */
+    min-height: 50px;
+    padding: 8px 5px; /* ছোট স্ক্রিনের জন্য প্যাডিং কিছুটা কমানো হয়েছে */
+    cursor: pointer;
+    font-size: 13px; /* মোবাইলে যাতে লেখা আটে তাই ফন্ট সাইজ সামান্য কমানো */
+    font-weight: 600;
+    border-radius: 10px;
+    border: none;
+    transition: all 0.2s ease;
+    white-space: nowrap; /* লেখা এক লাইনে রাখবে */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* হোভার ইফেক্ট */
+.button-group button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* আলাদা কালার স্টাইল */
+button.primary {
+    background: var(--success);
+    color: white;
+}
+
+button.warn {
+    background: var(--danger);
+    color: white;
+}
+
+button.ghost {
+    background: var(--accent);
+    color: var(--secondary);
+}
+#inpName,#inpRole,#inpPhone,#inpPhotoURL,#inpYear{
+    font-family: 'Adorsho', sans-serif !important;
+    }
+/* রেসপনসিভনেস (Mobile Optimization) */
+@media (max-width: 600px) {
+    .button-group {
+        flex-direction: row; /* মোবাইলেও সাইড-বাই-সাইড থাকবে */
+        gap: 6px; /* মোবাইলে গ্যাপ কিছুটা কমিয়ে জায়গা বাঁচানো হয়েছে */
+    }
+
+    .button-group button {
+        font-size: 14px; /* খুব ছোট স্ক্রিনে লেখা যাতে ওভারফ্লো না করে */
+        padding: 10px 4px;
+        border-radius: 8px;
+    }
+    #inpName,#inpRole,#inpPhone,#inpPhotoURL,#inpYear{
+    font-family: 'Adorsho', sans-serif !important;
+    }
+}
+
+
+</style>
+<script>
+  setupNavButtons('add');
+</script>
+</head>
+<body>
+  <header class="header">
+    <h3 style="margin:0;">রাফাহিয়াতুল ইনসান ফাউন্ডেশন</h3>
+</header>
+<div class="buttons-container">
+  <button onclick="location.href='member-info-view.html'">View Members</button>
+  <button onclick="location.href='member-info-edit.html'">Edit Members</button>
+</div>
+<h1 style="color: var(--brand) ;font-size: 18px;">RIF — নতুন মেম্বার যোগ</h1>
+
+<div class="card">
+  <label>Full Name</label>
+  <input id="inpName" placeholder="Md Masud Rana">
+
+  <label>Role</label>
+<select id="inpRole">
+  <option>আমির</option>
+  <option>নায়েবে-আমির</option>
+  <option>সেক্রেটারি</option>
+  <option>ক্যাশিয়ার</option>
+  <option>সাংগঠনিক সম্পাদক</option>
+  <option>প্রচার সম্পাদক</option>
+  <option>সাধারণ মেম্বার</option>
+</select>
+
+  <label>Phone (digits)</label>
+  <input id="inpPhone" placeholder="8801XXXXXXXXX">
+<label>Profile Photo (File or URL)</label>
+<div class="row">
+  <input type="file" id="inpFile" accept="image/*" style="flex: 1;">
+  <input type="text" id="inpPhotoURL" placeholder="অথবা ছবির লিঙ্ক দিন (https://...)" style="flex: 1;">
+</div>
+<div id="imgPreview" style="margin-top:10px; text-align:center; display:none;">
+    <img id="preview" src="" style="width:100px; height:120px; border-radius:8px; object-fit:cover; border:1px solid #ddd;">
+</div>
+
+  <label>Join Year</label>
+  <input id="inpYear" type="number" min="2000" max="2100" value="2026">
+
+  <label>Member ID (auto/manual)</label>
+  <input id="inpId" placeholder="RIF250001">
+
+  <label>Verification Code (numeric)</label>
+  <input id="inpVCode" readonly placeholder="auto">
+  
+<div class="button-group">
+  <button class="primary" id="btnGen">Generate ID</button>
+  <button class="warn" id="btnSave">Save Member</button>
+  <button class="ghost" id="btnClear">Clear Form</button></div>
+  
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getDatabase, ref, get, set
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBOBeWy-3P39kVnxNmQIMm0-Mawol1qjQU",
+  authDomain: "admin-fe276.firebaseapp.com",
+  databaseURL: "https://admin-fe276-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "admin-fe276",
+  storageBucket: "admin-fe276.appspot.com",
+  messagingSenderId: "1047359464238",
+  appId: "1:1047359464238:web:bbb93e1b350b8d925110bf"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const $ = id => document.getElementById(id);
+const pad = (n, len=4) => String(n).padStart(len, '0');
+const twoDigit = y => String(y).slice(-2);
+const sanitizeId = raw => String(raw||'').trim().toUpperCase();
+
+async function generateIdAndVcode(){
+  const year = Number($('inpYear').value) || new Date().getFullYear();
+  const yy = twoDigit(year);
+
+  const snap = await get(ref(db, 'members'));
+  let maxSerial = 0;
+  if(snap.exists()){
+    snap.forEach(ch => {
+      const m = ch.val();
+      if(!m || !m.id) return;
+      const match = String(m.id).match(/^RIF\d{2}(\d+)$/);
+      if(match){
+        const s = Number(match[1]);
+        if(!isNaN(s) && s > maxSerial) maxSerial = s;
+      }
+    });
+  }
+
+  const nextSerial = maxSerial + 1;
+  const newId = `RIF${yy}${pad(nextSerial,4)}`; // সর্বদা ৪ ডিজিট প্যাড, 9999+ হলে প্যাডিং অটোমেটিক বড় হবে
+
+  $('inpId').value = newId;
+
+  const phone = ($('inpPhone').value || '').replace(/\D/g,'');
+  const last7 = phone.slice(-7).padStart(7, '0');
+
+  // ভেরিফিকেশন কোডের সিরিয়াল অংশ ৪ ডিজিট প্যাডেড থাকবে, যেমন 0001 থেকে 9999 পর্যন্ত
+  // ১০০০০ এর উপরে গেলে ভেরিফিকেশন কোড সিরিয়াল স্বাভাবিক সংখ্যা থাকবে, প্যাডিং না থাকবে
+  let vcodeSerial = nextSerial <= 9999 ? pad(nextSerial,4) : String(nextSerial);
+
+  $('inpVCode').value = `${yy}${vcodeSerial}${last7}`;
+}
+
+async function saveMember(){
+  let id = sanitizeId($('inpId').value);
+  const name = ($('inpName').value || '').trim();
+  const role = ($('inpRole').value || '').trim();
+  const phone = ($('inpPhone').value || '').replace(/\D/g,'');
+  const year = ($('inpYear').value || '').trim();
+  const vcode = ($('inpVCode').value || '').trim();
+
+  // ফটো ডাটা হ্যান্ডলিং
+  let photoData = "";
+  const file = $('inpFile').files[0];
+  const url = $('inpPhotoURL').value.trim();
+
+  if(file) {
+      photoData = await toBase64(file); // ফাইল থেকে ছবি
+  } else if(url) {
+      photoData = url; // লিঙ্ক থেকে ছবি
+  }
+
+  if(!id || !name || !year){
+    alert('Name, ID এবং Join Year দরকার।');
+    return;
+  }
+
+  const nodeRef = ref(db, 'members/' + id);
+  const snap = await get(nodeRef);
+  let verified = snap.exists() ? Boolean(snap.val().verified) : false;
+
+  const payload = {
+    id, name, role, phone, year, vcode,
+    photo: photoData, // এখানে ছবি বা লিঙ্ক যেকোনো একটি সেভ হবে
+    verified, updatedAt: Date.now()
+  };
+
+  await set(nodeRef, payload);
+  alert('সফলভাবে মেম্বার সেভ হয়েছে ✅');
+  clearForm();
+}
+
+
+function clearForm(){
+  $('inpName').value='';
+  $('inpRole').value='সাধারণ মেম্বার';
+  $('inpPhone').value='';
+  $('inpYear').value=new Date().getFullYear();
+  $('inpId').value='';
+  $('inpVCode').value='';
+  $('inpFile').value='';
+  $('inpPhotoURL').value='';
+  $('imgPreview').style.display='none';
+  $('preview').src='';
+}
+
+$('btnGen').onclick = generateIdAndVcode;
+$('btnSave').onclick = saveMember;
+$('btnClear').onclick = clearForm;
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});
+
+// ফাইল সিলেক্ট করলে প্রিভিউ দেখাবে
+$('inpFile').onchange = async e => {
+    const file = e.target.files[0];
+    if (file) {
+        $('inpPhotoURL').value = ''; // ফাইল দিলে ইউআরএল ক্লিয়ার হবে
+        const base64 = await toBase64(file);
+        $('preview').src = base64;
+        $('imgPreview').style.display = 'block';
+    }
+};
+
+// লিঙ্ক দিলে প্রিভিউ দেখাবে
+$('inpPhotoURL').oninput = e => {
+    const url = e.target.value.trim();
+    if (url) {
+        $('inpFile').value = ''; // লিঙ্ক দিলে ফাইল ক্লিয়ার হবে
+        $('preview').src = url;
+        $('imgPreview').style.display = 'block';
+    }
+};
+
+</script>
+</body>
+</html>

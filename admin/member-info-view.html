@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>RIF— Members List</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<canvas id="idCardCanvas" width="800" height="500" style="display:none;"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+:root {
+    --primary: #00695c;
+    --secondary: #004d40;
+    --accent: #ffc107;
+    --danger: #ff5252;
+    --success: #2ecc71;
+    --bg: #f0f2f5;
+    --white: #ffffff;
+    --text: #2c3e50;
+    --muted: #7f8c8d;
+    --border: #e0e6ed;
+}
+
+/* RESET & FONTS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+@font-face {
+    font-family: 'Adorsho';
+    src: url('AdorshoLip.ttf') format('truetype');
+}
+body {
+font-family: 'Adorsho', sans-serif !important; 
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+}
+
+/* HEADER */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: var(--secondary);
+    color: var(--white);
+    padding: 16px;
+    text-align: center;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.header h3 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+
+/* MAIN CONTAINER */
+body > .buttons-container, 
+body > h1, 
+body > input[type="search"], 
+body > table {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* TOP NAVIGATION */
+.buttons-container {
+    margin-top: 100px;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+    padding: 0 15px;
+}
+
+.buttons-container button {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    background: var(--primary);
+    color: var(--white);
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.buttons-container button:hover {
+    background: var(--primary);
+    color: white;
+}
+
+h1 {
+    color: var(--primary);
+    margin: 20px 0;
+    font-weight: 800;
+    text-align: center;
+    font-size: 26px;
+}
+
+/* SEARCH BOX */
+input[type="search"] {
+    width: calc(100% - 30px);
+    margin-left: 15px !important;
+    padding: 14px 20px;
+    border-radius: 15px;
+    border: 2px solid var(--border);
+    outline: none;
+    transition: 0.3s;
+    background: white;
+    font-size: 15px;
+}
+
+input[type="search"]:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(0, 105, 92, 0.1);
+}
+
+/* TABLE DESIGN */
+table {
+    width: calc(100% - 30px);
+    margin: 0 15px 50px;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+th {
+    color: var(--muted);
+    font-weight: 600;
+    text-align: left;
+    padding: 12px 15px;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+td {
+    background: white;
+    padding: 15px;
+    font-size: 14px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+td:first-child { border-left: 1px solid var(--border); border-radius: 12px 0 0 12px; font-weight: 700; color: var(--primary); }
+td:last-child { border-right: 1px solid var(--border); border-radius: 0 12px 12px 0; }
+
+/* STATUS TAGS */
+.ok { background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px; }
+.tag { background: #ffebee; color: #c62828; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px; }
+
+/* SCRATCH CARD (SECRET CODE) */
+.vcode-wrapper {
+    position: relative;
+    width: 110px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid var(--border);
+}
+
+.vcode-text {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 700;
+    color: var(--text);
+    font-size: 14px;
+}
+
+.scratch-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(45deg, #333, #333 5px, #444 5px, #444 10px);
+    transition: transform 0.4s ease, opacity 0.3s ease;
+    z-index: 2;
+}
+
+.scratch-overlay.hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+}
+
+/* DANGER ZONE - VERTICAL BUTTONS */
+td:last-child {
+    min-width: 100px;
+}
+
+.v-group {
+    display: flex;
+    flex-direction: column; /* বাটনগুলোকে উপর-নিচ করবে */
+    gap: 8px; /* মাঝখানের ফাঁকা জায়গা */
+    align-items: stretch;
+}
+
+.v-group button {
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    color: white;
+    transition: 0.2s;
+}
+
+/* ডিলিট বাটন (লাল) */
+.btn-delete {
+    background-color: var(--danger) !important;
+}
+
+/* প্রিন্ট বাটন (ব্র্যান্ড কালার) */
+.btn-print {
+    background-color: var(--primary) !important;
+}
+
+.v-group button:hover {
+    filter: brightness(0.9);
+}
+#searchInput{
+font-family: 'Adorsho', sans-serif !important; 
+}
+/* RESPONSIVE */
+@media(max-width: 850px) {
+    table { display: block; overflow-x: auto; white-space: nowrap; }
+    .buttons-container { flex-direction: row; gap: 8px; }
+    .buttons-container button { font-size: 12px; padding: 10px 5px; }
+    h1 { font-size: 20px; }
+    
+    /* মোবাইলেও যাতে উপর-নিচ থাকে তা নিশ্চিত করা */
+    .v-group {
+        width: 90px;
+    }
+    #searchInput{
+    font-family: 'Adorsho', sans-serif !important; 
+    }
+}
+</style>
+
+<script>
+  setupNavButtons('view');
+</script>
+</head>
+<body>
+  <header class="header">
+    <h3 style="margin:0;">রাফাহিয়াতুল ইনসান ফাউন্ডেশন</h3>
+</header>
+
+<div class="buttons-container">
+  <button onclick="location.href='member-info-add.html'">Add Member</button>
+  <button onclick="location.href='member-info-edit.html'">Edit Members</button>
+</div>
+<h1>RIF — মেম্বার লিস্ট</h1>
+
+<input type="search" id="searchInput" placeholder="ID, নাম বা ফোন দিয়ে সার্চ করুন">
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>নাম</th>
+      <th>Role</th>
+      <th>Phone</th>
+      <th>Join Year</th>
+      <th>Verified</th>
+      <th>Secret Code</th>
+      <th>Danger Zone</th>
+    </tr>
+  </thead>
+  <tbody id="membersBody">
+    <tr><td colspan="7" class="small">লোড হচ্ছে...</td></tr>
+  </tbody>
+</table>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  
+  const firebaseConfig = {
+    apiKey: "AIzaSyBOBeWy-3P39kVnxNmQIMm0-Mawol1qjQU",
+    authDomain: "admin-fe276.firebaseapp.com",
+    databaseURL: "https://admin-fe276-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "admin-fe276",
+    storageBucket: "admin-fe276.appspot.com",
+    messagingSenderId: "1047359464238",
+    appId: "1:1047359464238:web:bbb93e1b350b8d925110bf"
+  };
+  
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  
+  const tbody = document.getElementById('membersBody');
+  const searchInput = document.getElementById('searchInput');
+  
+  let members = {};
+  
+  /* =========================
+     SCRATCH / SECRET CODE CELL
+  ========================= */
+  function createScratchCell(vcode) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'vcode-wrapper';
+    
+    const text = document.createElement('span');
+    text.className = 'vcode-text';
+    text.textContent = vcode || '';
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'scratch-overlay';
+    
+    let timeoutId = null;
+    
+    function toggleOverlay() {
+      if (overlay.classList.contains('hidden')) {
+        overlay.classList.remove('hidden');
+        if (timeoutId) clearTimeout(timeoutId);
+      } else {
+        overlay.classList.add('hidden');
+        timeoutId = setTimeout(() => {
+          overlay.classList.remove('hidden');
+        }, 5000);
+      }
+    }
+    
+    overlay.addEventListener('click', toggleOverlay);
+    overlay.addEventListener('touchstart', toggleOverlay);
+    
+    wrapper.appendChild(text);
+    wrapper.appendChild(overlay);
+    
+    return wrapper;
+  }
+  
+  /* =========================
+     RENDER MEMBERS
+  ========================= */
+  function renderMembers(filterTerm = '') {
+    tbody.innerHTML = '';
+    
+    const keys = Object.keys(members).sort();
+    const term = filterTerm.trim().toLowerCase();
+    
+    const filtered = keys.filter(k => {
+      const m = members[k];
+      if (!m) return false;
+      return (`${m.id} ${m.name} ${m.phone}`.toLowerCase()).includes(term);
+    });
+    
+    if (filtered.length === 0) {
+      tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="small">কোনো মেম্বার পাওয়া যায়নি</td>
+      </tr>`;
+      return;
+    }
+    
+    for (const k of filtered) {
+      const m = members[k];
+      
+      const tr = document.createElement('tr');
+      
+      /* =========================
+         MAIN COLUMNS
+      ========================= */
+      tr.innerHTML = `
+      <td>${m.id}</td>
+      <td>${m.name}</td>
+      <td>${m.role || ''}</td>
+      <td>${m.phone || ''}</td>
+      <td>${m.year || ''}</td>
+      <td>${m.verified ? '<span class="ok">Yes</span>' : '<span class="tag">No</span>'}</td>
+    `;
+      
+      /* =========================
+         VCODE COLUMN
+      ========================= */
+      const tdVcode = document.createElement('td');
+      tdVcode.appendChild(createScratchCell(m.vcode));
+      
+      /* =========================
+         DELETE & PRINT BUTTON COLUMN
+      ========================= */
+      const tdAction = document.createElement('td');
+
+      // বাটনগুলোকে উপর-নিচ রাখার জন্য একটি গ্রুপ কন্টেইনার তৈরি
+      const btnGroup = document.createElement('div');
+      btnGroup.className = 'v-group'; // এই ক্লাসটি CSS থেকে ডিজাইন পাবে
+
+      // 🔴 DELETE BUTTON
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.className = 'btn-delete'; // CSS ক্লাসের নাম
+
+      deleteBtn.onclick = async () => {
+        if (!confirm('আপনি কি নিশ্চিত এই মেম্বার ডিলিট করতে চান?')) return;
+        try {
+          await remove(ref(db, 'members/' + m.id));
+          alert('মেম্বার ডিলিট হয়েছে');
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      };
+
+      // 🖨️ PRINT BUTTON
+      const printBtn = document.createElement('button');
+      printBtn.textContent = 'Print ID';
+      printBtn.className = 'btn-print'; // CSS ক্লাসের নাম
+
+      printBtn.onclick = () => {
+        generatePDF(m);
+      };
+
+      // বাটনগুলোকে গ্রুপে যোগ করা
+      btnGroup.appendChild(deleteBtn);
+      btnGroup.appendChild(printBtn);
+
+      // গ্রুপটিকে টেবিল সেলে (td) যোগ করা
+      tdAction.appendChild(btnGroup);
+
+      /* =========================
+         FINAL ROW ORDER FIXED
+      ========================= */
+      tr.appendChild(tdVcode);
+      tr.appendChild(tdAction);
+      
+      tbody.appendChild(tr);
+    }
+  }
+  
+  /* =========================
+     SEARCH
+  ========================= */
+  searchInput.addEventListener('input', e => {
+    renderMembers(e.target.value);
+  });
+  
+  /* =========================
+     FIREBASE LISTENER
+  ========================= */
+  onValue(ref(db, 'members'), snap => {
+    members = snap.val() || {};
+    renderMembers(searchInput.value);
+  });
+  
+  async function generatePDF(member) {
+    const canvas = document.getElementById('idCardCanvas');
+    const ctx = canvas.getContext('2d');
+    const { jsPDF } = window.jspdf;
+
+    const width = 800;
+    const height = 500;
+    canvas.width = width;
+    canvas.height = height;
+
+    const brandColor = "#006064";
+
+    // ১. ক্যানভাস ক্লিয়ার এবং ব্যাকগ্রাউন্ড সেট করা
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, width, height);
+
+    // প্রতিষ্ঠানের নাম এবং হেডার (ছবি আসার আগেই এঁকে ফেলছি)
+    ctx.fillStyle = brandColor;
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(width, 0); ctx.lineTo(width, 110);
+    ctx.bezierCurveTo(width * 0.7, 140, width * 0.3, 80, 0, 120);
+    ctx.fill();
+
+    ctx.fillStyle = "#FFFFFF";
+    ctx.textAlign = "center";
+    ctx.font = "bold 38px 'Adorsho', Adorsho";
+    ctx.fillText("রফাহিয়াতুল ইনসান ফাউন্ডেশন", width / 2 + 30, 55);
+    ctx.font = " 20px Adorsho";
+    ctx.fillText("অফিসিয়াল পরিচয়পত্র", width / 2 + 30, 85);
+
+    // ছবি লোড করার জন্য প্রমিজ (Promise) ব্যবহার
+    const loadImage = (src) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous"; // অনলাইন লিঙ্কের জন্য জরুরি
+            img.onload = () => resolve(img);
+            img.onerror = () => resolve(null); // ছবি না পেলে নাল রিটার্ন করবে
+            img.src = src;
+        });
+    };
+
+    // ছবি লোড করা হচ্ছে
+    const userImg = member.photo ? await loadImage(member.photo) : null;
+
+    // ফটো ফ্রেম (বর্ডারসহ)
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = brandColor;
+    ctx.strokeRect(50, 150, 180, 220);
+    ctx.fillStyle = "#F5F5F5";
+    ctx.fillRect(52, 152, 176, 216);
+
+    if (userImg) {
+        // ছবি পাওয়া গেলে সেটি আঁকা হবে
+        ctx.drawImage(userImg, 52, 152, 176, 216);
+    } else {
+        // ছবি না থাকলে PHOTO লেখাটি আসবে
+        ctx.fillStyle = "#999";
+        ctx.textAlign = "center";
+        ctx.font = "20px Arial";
+        ctx.fillText("PHOTO", 140, 265);
+    }
+
+    // মেম্বার ইনফরমেশন
+    const infoX = 260;
+    ctx.textAlign = "left";
+    ctx.fillStyle = brandColor;
+    ctx.font = (member.name && member.name.length > 20) ? "bold 24px 'Adorsho'" : "bold 30px 'Adorsho'";
+    ctx.fillText(member.name || "N/A", infoX, 190);
+
+    ctx.fillStyle = "#333";
+    ctx.font = "22px 'Adorsho', Adorsho";
+
+    // ভেরিফাইড স্ট্যাটাস চেক (Yes/No)
+    const isVerified = (member.verified === true || member.verified === "true") ? "Yes" : "No";
+
+    const details = [
+        { label: "সদস্য আইডি", value: `: ${member.id || ''}` },
+        { label: "পদবী", value: `: ${member.role || ''}` },
+        { label: "মোবাইল", value: `: ${member.phone || ''}` },
+        { label: "ভেরিফাইড", value: `: ${isVerified}` } // রক্তের গ্রুপের জায়গায় এটি বসবে
+    ];
+
+    details.forEach((item, index) => {
+        ctx.fillStyle = "#333"; // ডিফল্ট কালার
+        ctx.font = "bold 22px 'Adorsho'";
+        ctx.fillText(item.label, infoX, 245 + (index * 40));
+        
+        ctx.font = "22px 'Adorsho'";
+        
+        // ভেরিফাইড টেক্সটটি আলাদা রঙে দেখাতে চাইলে (ঐচ্ছিক)
+        if(item.label === "ভেরিফাইড"){
+            ctx.fillStyle = (isVerified === "Yes") ? "#2e7d32" : "#d32f2f"; // Yes হলে সবুজ, No হলে লাল
+        }
+
+        ctx.fillText(item.value, infoX + 130, 245 + (index * 40));
+    });
+
+    // ফুটার
+    ctx.fillStyle = brandColor;
+    ctx.fillRect(0, 450, width, 50);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "18px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("www.rafahiyatulinsan.2bd.net", width / 2, 482);
+
+    const imgDataFront = canvas.toDataURL('image/png');
+    // এরপর থেকে ব্যাক সাইডের কোড (ctx.clearRect...) অপরিবর্তিত থাকবে
+
+
+
+    // ==========================================
+    // ২. ব্যাক সাইড (BACK SIDE)
+    // ==========================================
+    ctx.clearRect(0, 0, width, height);
+    
+    // ব্যাকগ্রাউন্ড ও বর্ডার
+    ctx.fillStyle = "#FDFDFD";
+    ctx.fillRect(0, 0, width, height);
+    ctx.strokeStyle = brandColor;
+    ctx.lineWidth = 10;
+    ctx.strokeRect(5, 5, width - 10, height - 10);
+
+    // শিরোনাম
+    ctx.fillStyle = brandColor;
+    ctx.textAlign = "left";
+    ctx.font = "bold 28px 'Adorsho'";
+    ctx.fillText("শর্তাবলী ও নিয়মাবলী", 50, 70);
+    ctx.fillRect(50, 80, 220, 3); // আন্ডারলাইন
+
+
+
+    // নিয়মাবলী
+    ctx.fillStyle = "#444";
+    ctx.font = "20px 'Adorsho'";
+    const rules = [
+        "১. এই কার্ডটি ফাউন্ডেশনের সম্পদ এবং হস্তান্তরযোগ্য নয়।",
+        "২. ফাউন্ডেশনের সকল কার্যক্রমে এই কার্ডটি বহন করা বাধ্যতামূলক।",
+        "৩. হারিয়ে গেলে দ্রুত নিকটস্থ অফিসকে অবহিত করুন।",
+        "৪. অপব্যবহার সদস্যপদ বাতিলের কারণ হতে পারে।"
+    ];
+
+    rules.forEach((rule, index) => {
+        // wrapText এখানে প্রয়োজন নেই কারণ কার্ডের উইডথ যথেষ্ট
+        ctx.fillText(rule, 50, 130 + (index * 45));
+    });
+    // --- সিক্রেট কোড (Secret Code) আপডেট করা হয়েছে ---
+    ctx.fillStyle = "#888"; // হালকা গ্রে কালার
+    ctx.font = "bold 16px Adorsho";
+    ctx.textAlign = "left";
+    // এখানে member.secretCode এর বদলে member.vcode ব্যবহার করা হয়েছে
+    ctx.fillText(`SECRET CODE: ${member.vcode || 'N/A'}`, 50, 320);
+
+    // স্বাক্ষর সেকশন
+    ctx.strokeStyle = "#888";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(50, 400); ctx.lineTo(250, 400); // মেম্বার
+    ctx.moveTo(550, 400); ctx.lineTo(750, 400); // অথরিটি
+    ctx.stroke();
+
+    ctx.textAlign = "center";
+    ctx.font = "18px 'Adorsho'";
+    ctx.fillText("সদস্যের স্বাক্ষর", 150, 430);
+    ctx.fillText("কর্তৃপক্ষের স্বাক্ষর", 650, 430);
+
+    const imgDataBack = canvas.toDataURL('image/png');
+
+    // ==========================================
+    // ৩. PDF জেনারেশন
+    // ==========================================
+    const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [width, height]
+    });
+
+    pdf.addImage(imgDataFront, 'PNG', 0, 0, width, height);
+    pdf.addPage([width, height], 'landscape');
+    pdf.addImage(imgDataBack, 'PNG', 0, 0, width, height);
+
+    pdf.save(`ID_Card_${member.id}.pdf`);
+}
+
+</script>
+</body>
+</html>
