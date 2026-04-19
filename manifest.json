@@ -1,0 +1,23 @@
+{
+  "name": "RIF Admin Dashboard",
+  "short_name": "RIF Admin",
+  "description": "Professional Admin Panel for RIF",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#004d40",
+  "theme_color": "#00695c",
+  "icons": [
+    {
+      "src": "admin192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "admin512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIF - Dynamic Leader & Member Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root { --primary: #00695c; --bg: #f4f7f6; --white: #ffffff; }
+        @font-face {
+    font-family: 'Adorsho';
+    src: url('AdorshoLip.ttf') format('truetype');
+}
+        body { font-family: 'Adorsho', sans-serif !important;
+        background: var(--bg); margin: 0; padding-bottom: 50px; color: #333; }
+        .header { background: var(--primary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .container { padding: 15px; max-width: 800px; margin: auto; }
+
+        .filter-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        .select-style { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-family: 'Adorsho', sans-serif !important; font-size: 15px; outline: none; background: white; }
+
+        .leader-card { background: var(--white); border-radius: 15px; overflow: hidden; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .leader-header { background: linear-gradient(135deg, #00695c, #004d40); color: white; padding: 15px; display: flex; align-items: center; justify-content: space-between; }
+        .leader-profile { display: flex; align-items: center; gap: 12px; }
+        .leader-img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; }
+        
+        .btn-group { display: flex; gap: 5px; }
+        .action-btn { background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        .action-btn:hover { background: white; color: var(--primary); }
+
+        .member-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #f1f1f1; gap: 12px; transition: 0.2s; }
+        .member-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #eee; }
+        .m-info { flex: 1; }
+        .m-info b { font-size: 15px; display: block; }
+        .m-info span { font-size: 12px; color: #666; }
+        .pay-check { width: 22px; height: 22px; accent-color: var(--primary); cursor: pointer; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .form-input { width: 100%; padding: 12px; margin: 8px 0 15px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: 'Hind Siliguri'; }
+        
+        .btn-save { background: var(--primary); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .whatsapp-btn { background: #25D366 !important; margin-top: 10px; border: none; color: white; padding: 10px; border-radius: 10px; width: 100%; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+        .empty-msg { padding: 20px; text-align: center; color: #999; font-size: 14px; }
+        
+                /* Login Overlay Style */
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .login-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 70%; max-width: 350px; text-align: center; }
+        .login-card h2 { margin-bottom: 20px; color: var(--primary); font-size: 22px; }
+        .login-card input {font-family: 'Adorsho', sans-serif !important;
+            width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        .login-btn { font-family: 'Adorsho', sans-serif !important;
+            background: var(--primary); color: white; border: none; width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; }
+
+    </style>
+</head>
+<body>
+<div id="login-overlay" style="display: none;">
+    <div class="login-card">
+        <i class="fa fa-lock" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i>
+        <h2 id="login-title">লিডার লগইন</h2>
+        <p style="font-size: 12px; font-weight: bold; background: gold; border-radius: 3px;">আপনার গ্রুপের মেম্বারদের অনুদানের অবস্থা দেখুন</p>
+        <input type="password" id="leaderPasswordInput" placeholder="গোপন পাসওয়ার্ড দিন">
+        <button class="login-btn" onclick="verifyLeaderPassword()">প্রবেশ করুন</button>
+        <p id="login-error" style="color: red; margin-top: 10px; display: none;">ভুল পাসওয়ার্ড!</p>
+    </div>
+</div>
+
+<header class="header">
+    <h3 style="margin:0;">রাফাহিয়াতুল ইনসান ফাউন্ডেশন</h3>
+</header>
+
+<div class="container">
+    <div class="filter-box">
+        <select id="yearFilter" class="select-style" onchange="loadGroups()"></select>
+        <select id="monthFilter" class="select-style" onchange="loadGroups()"></select>
+    </div>
+    <div id="group-list"></div>
+</div>
+
+<div id="addMemberModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle" style="margin-top:0; color:var(--primary);">সদস্য যোগ করুন</h3>
+        <label>সদস্যের নাম</label>
+        <input type="text" id="newMName" class="form-input" placeholder="নাম লিখুন">
+        <label>মোবাইল নম্বর</label>
+        <input type="tel" id="newMPhone" class="form-input" placeholder="017XXXXXXXX">
+        <label>ছবির লিঙ্ক (URL)</label>
+        <input type="text" id="newMPhoto" class="form-input" placeholder="https://...">
+        <div style="display:flex; gap:10px;">
+            <button class="btn-save" onclick="saveMemberToDB()">সেভ করুন</button>
+            <button onclick="closeModal()" style="background:#eee; border:none; padding:12px; border-radius:8px; cursor:pointer;">বাতিল</button>
+        </div>
+    </div>
+</div>
+
+<div id="editMemberModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:var(--primary);">সদস্যের তথ্য সংশোধন</h3>
+        <input type="hidden" id="editMId">
+        <label>সদস্যের নাম</label>
+        <input type="text" id="editMName" class="form-input">
+        <label>মোবাইল নম্বর</label>
+        <input type="tel" id="editMPhone" class="form-input">
+        <label>ছবির লিঙ্ক (URL)</label>
+        <input type="text" id="editMPhoto" class="form-input">
+        <div style="display:flex; gap:10px;">
+            <button class="btn-save" onclick="updateMemberInDB()">আপডেট করুন</button>
+            <button onclick="closeEditModal()" style="background:#eee; border:none; padding:12px; border-radius:8px; cursor:pointer;">বাতিল</button>
+        </div>
+    </div>
+</div>
+<script src="public-view.js"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>অ্যাক্সেস ডিনাইড - রাফাহিয়াতুল ইনসান ফাউন্ডেশন</title>
+    <style>
+        @font-face {
+            font-family: 'Adorsho';
+            src: url('AdorshoLip.ttf') format('truetype');
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8d7da;
+            font-family: 'Adorsho', 'Segoe UI', sans-serif !important;
+            color: #721c24;
+        }
+
+        .warning-card {
+            width: 70%;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            border: 2px solid #f5c6cb;
+            animation: shake 0.5s ease-in-out; 
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #dc3545;
+            display: block;
+        }
+
+        h1 { 
+            margin: 10px 0; 
+            font-size: 26px; 
+            color: #dc3545; 
+        }
+
+        p { 
+            margin-bottom: 25px; 
+            line-height: 1.6; 
+            font-size: 16px; 
+            color: #444; 
+        }
+    </style> </head>
+<body>
+
+<audio id="warningSound" src="WARNING SOUND.mp3" preload="auto"></audio>
+
+<div class="warning-card">
+    <div class="icon">⚠️</div>
+    <h1>অ্যাক্সেস ডিনাইড! 👹</h1>
+    <p>আপনি সরাসরি এই পেজে ঢোকার চেষ্টা করছেন। আপনার কাছে কোনো বৈধ লিডার আইডি নেই। দয়া করে আপনার নির্দিষ্ট লিঙ্কটি ব্যবহার করুন। <br />ধন্যবাদ 🥀🥀🥀</p>
+</div>
+
+<script>
+    const sound = document.getElementById("warningSound");
+
+    function playWarning() {
+        sound.play().then(() => {
+            // সাউন্ড একবার সফলভাবে বাজলে সব লিসেনার রিমুভ করে দাও
+            document.removeEventListener('click', playWarning);
+            document.removeEventListener('mousemove', playWarning);
+            document.removeEventListener('touchstart', playWarning);
+            document.removeEventListener('touchmove', playWarning); // নতুন যোগ করা হয়েছে
+            window.removeEventListener('scroll', playWarning);      // নতুন যোগ করা হয়েছে
+            console.log("সাউন্ড বাজছে...");
+        }).catch(error => {
+            console.log("সাউন্ড বাজাতে ইন্টারঅ্যাকশন প্রয়োজন।");
+        });
+    }
+
+    // ১. ক্লিক করলে
+    document.addEventListener('click', playWarning);
+    
+    // ২. মাউস নাড়ালে
+    document.addEventListener('mousemove', playWarning);
+    
+    // ৩. স্ক্রিনে প্রথম টাচ করলে
+    document.addEventListener('touchstart', playWarning);
+
+    // ৪. স্ক্রিনে আঙুল দিয়ে টানাটানি করলে (Mobile Swipe/Drag)
+    document.addEventListener('touchmove', playWarning);
+
+    // ৫. মাউস বা আঙুল দিয়ে স্ক্রল করলে
+    window.addEventListener('scroll', playWarning);
+
+    // অটো-প্লে ট্রাই
+    window.onload = () => {
+        playWarning();
+    };
+</script>
+
+</body>
+</html>
